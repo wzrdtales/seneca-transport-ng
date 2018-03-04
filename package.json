@@ -10,18 +10,17 @@
     "type": "git",
     "url": "git+https://github.com/senecajs/seneca-transport.git"
   },
-  "keywords": [
-    "seneca",
-    "transport",
-    "plugin"
-  ],
+  "keywords": ["seneca", "transport", "plugin"],
   "scripts": {
-    "test": "lab -v -L -P test -t 81 -m 5000 -I WebAssembly",
-    "test-report": "lab -v -L -P test -t 81 -m 5000 -r html -I WebAssembly > test/report.html; open test/report.html",
+    "test": "lab -v  -P test -t 81 -m 5000 -I WebAssembly",
+    "test-report":
+      "lab -v -L -P test -t 81 -m 5000 -r html -I WebAssembly > test/report.html; open test/report.html",
     "bench": "node bench",
     "coveralls": "lab -s -P test -r lcov -I WebAssembly | coveralls",
-    "coverage": "lab -v -P test -L -t 81 -r html -I WebAssembly > docs/coverage.html",
-    "annotate": "docco transport.js -o docs/annotated; open docs/annotated/transport.html"
+    "coverage":
+      "lab -v -P test -L -t 81 -r html -I WebAssembly > docs/coverage.html",
+    "annotate":
+      "docco transport.js -o docs/annotated; open docs/annotated/transport.html"
   },
   "contributors": [
     "Richard Rodger (https://github.com/rjrodger)",
@@ -62,9 +61,12 @@
     "code": "3.0.x",
     "coveralls": "2.11.x",
     "docco": "0.7.x",
-    "eslint-config-seneca": "3.x.x",
-    "eslint-plugin-hapi": "4.x.x",
-    "eslint-plugin-standard": "2.x.x",
+    "eslint": "^4.18.2",
+    "eslint-config-standard": "^11.0.0",
+    "eslint-plugin-import": "^2.9.0",
+    "eslint-plugin-node": "^6.0.1",
+    "eslint-plugin-promise": "^3.6.0",
+    "eslint-plugin-standard": "^3.0.1",
     "lab": "11.0.x",
     "pre-commit": "1.1.x",
     "seneca": "plugin",
@@ -72,14 +74,6 @@
     "seneca-transport-test": "0.2.0",
     "sinon": "1.17.x"
   },
-  "files": [
-    "transport.js",
-    "README.md",
-    "LICENSE",
-    "bench.js",
-    "lib"
-  ],
-  "pre-commit": [
-    "test"
-  ]
+  "files": ["transport.js", "README.md", "LICENSE", "bench.js", "lib"],
+  "pre-commit": ["test"]
 }

@@ -1,13 +1,13 @@
 /* Copyright (c) 2013-2015 Richard Rodger & other contributors, MIT License */
 /* jshint node:true, asi:true, eqnull:true */
-'use strict'
+'use strict';
 
 // Load modules
-var _ = require('lodash')
-var LruCache = require('lru-cache')
-var Tcp = require('./lib/tcp')
-var TransportUtil = require('./lib/transport-utils.js')
-var Http = require('./lib/http')
+var _ = require('lodash');
+var LruCache = require('lru-cache');
+var Tcp = require('./lib/tcp');
+var TransportUtil = require('./lib/transport-utils.js');
+var Http = require('./lib/http');
 
 // Declare internals
 var internals = {
@@ -46,101 +46,136 @@ var internals = {
     }
   },
   plugin: 'transport'
-}
+};
 
 module.exports = function transport (options) {
-  var seneca = this
+  var seneca = this;
 
-  var settings = seneca.util.deepextend(internals.defaults, options)
-  var callmap = LruCache(settings.callmax)
+  var settings = seneca.util.deepextend(internals.defaults, options);
+  var callmap = LruCache(settings.callmax);
   var transportUtil = new TransportUtil({
     callmap: callmap,
     seneca: seneca,
     options: settings
-  })
+  });
 
-  seneca.add({ role: internals.plugin, cmd: 'inflight' }, internals.inflight(callmap))
-  seneca.add({ role: internals.plugin, cmd: 'listen' }, internals.listen)
-  seneca.add({ role: internals.plugin, cmd: 'client' }, internals.client)
+  seneca.add(
+    { role: internals.plugin, cmd: 'inflight' },
+    internals.inflight(callmap)
+  );
+  seneca.add({ role: internals.plugin, cmd: 'listen' }, internals.listen);
+  seneca.add({ role: internals.plugin, cmd: 'client' }, internals.client);
 
-  seneca.add({ role: internals.plugin, hook: 'listen', type: 'tcp' }, Tcp.listen(settings, transportUtil))
-  seneca.add({ role: internals.plugin, hook: 'client', type: 'tcp' }, Tcp.client(settings, transportUtil))
+  seneca.add(
+    { role: internals.plugin, hook: 'listen', type: 'tcp' },
+    Tcp.listen(settings, transportUtil)
+  );
+  seneca.add(
+    { role: internals.plugin, hook: 'client', type: 'tcp' },
+    Tcp.client(settings, transportUtil)
+  );
 
-  seneca.add({ role: internals.plugin, hook: 'listen', type: 'web' }, Http.listen(settings, transportUtil))
-  seneca.add({ role: internals.plugin, hook: 'client', type: 'web' }, Http.client(settings, transportUtil))
+  seneca.add(
+    { role: internals.plugin, hook: 'listen', type: 'web' },
+    Http.listen(settings, transportUtil)
+  );
+  seneca.add(
+    { role: internals.plugin, hook: 'client', type: 'web' },
+    Http.client(settings, transportUtil)
+  );
 
   // Aliases.
-  seneca.add({ role: internals.plugin, hook: 'listen', type: 'http' }, Http.listen(settings, transportUtil))
-  seneca.add({ role: internals.plugin, hook: 'client', type: 'http' }, Http.client(settings, transportUtil))
+  seneca.add(
+    { role: internals.plugin, hook: 'listen', type: 'http' },
+    Http.listen(settings, transportUtil)
+  );
+  seneca.add(
+    { role: internals.plugin, hook: 'client', type: 'http' },
+    Http.client(settings, transportUtil)
+  );
 
   // Legacy API.
-  seneca.add({ role: internals.plugin, hook: 'listen', type: 'direct' }, Http.listen(settings, transportUtil))
-  seneca.add({ role: internals.plugin, hook: 'client', type: 'direct' }, Http.client(settings, transportUtil))
+  seneca.add(
+    { role: internals.plugin, hook: 'listen', type: 'direct' },
+    Http.listen(settings, transportUtil)
+  );
+  seneca.add(
+    { role: internals.plugin, hook: 'client', type: 'direct' },
+    Http.client(settings, transportUtil)
+  );
 
   return {
     name: internals.plugin,
     exportmap: { utils: transportUtil },
     options: settings
-  }
-}
+  };
+};
 
 module.exports.preload = function () {
-  var seneca = this
+  var seneca = this;
 
   var meta = {
     name: internals.plugin,
     exportmap: {
       utils: function () {
-        var transportUtil = seneca.export(internals.plugin).utils
+        var transportUtil = seneca.export(internals.plugin).utils;
         if (transportUtil !== meta.exportmap.utils) {
-          transportUtil.apply(this, arguments)
+          transportUtil.apply(this, arguments);
         }
       }
     }
-  }
+  };
 
-  return meta
-}
+  return meta;
+};
 
 internals.inflight = function (callmap) {
   return function (args, callback) {
-    var inflight = {}
+    var inflight = {};
     callmap.forEach(function (val, key) {
-      inflight[key] = val
-    })
-    callback(null, inflight)
-  }
-}
+      inflight[key] = val;
+    });
+    callback(null, inflight);
+  };
+};
 
 internals.listen = function (args, callback) {
-  var seneca = this
+  var seneca = this;
 
-  var config = _.extend({}, args.config, { role: internals.plugin, hook: 'listen' })
-  var listen_args = seneca.util.clean(_.omit(config, 'cmd'))
-  var legacyError = internals.legacyError(seneca, listen_args.type)
+  var config = _.extend({}, args.config, {
+    role: internals.plugin,
+    hook: 'listen'
+  });
+  var listenArgs = seneca.util.clean(_.omit(config, 'cmd'));
+  var legacyError = internals.legacyError(seneca, listenArgs.type);
   if (legacyError) {
-    return callback(legacyError)
+    return callback(legacyError);
   }
-  seneca.act(listen_args, callback)
-}
+  seneca.act(listenArgs, callback);
+};
 
 internals.client = function (args, callback) {
-  var seneca = this
+  var seneca = this;
 
-  var config = _.extend({}, args.config, { role: internals.plugin, hook: 'client' })
-  var client_args = seneca.util.clean(_.omit(config, 'cmd'))
-  var legacyError = internals.legacyError(seneca, client_args.type)
+  var config = _.extend({}, args.config, {
+    role: internals.plugin,
+    hook: 'client'
+  });
+  var clientArgs = seneca.util.clean(_.omit(config, 'cmd'));
+  var legacyError = internals.legacyError(seneca, clientArgs.type);
   if (legacyError) {
-    return callback(legacyError)
+    return callback(legacyError);
   }
-  seneca.act(client_args, callback)
-}
+  seneca.act(clientArgs, callback);
+};
 
 internals.legacyError = function (seneca, type) {
   if (type === 'pubsub') {
-    return seneca.fail('plugin-needed', { name: 'seneca-redis-transport' })
+    return seneca.fail('plugin-needed', { name: 'seneca-redis-transport' });
   }
   if (type === 'queue') {
-    return seneca.fail('plugin-needed', { name: 'seneca-beanstalkd-transport' })
+    return seneca.fail('plugin-needed', {
+      name: 'seneca-beanstalkd-transport'
+    });
   }
-}
+};
